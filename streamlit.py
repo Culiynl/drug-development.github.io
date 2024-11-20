@@ -75,17 +75,60 @@ def admet_from_smiles(smiles):
     return organized_predictions
 
 import streamlit as st
+from rdkit import Chem
+from rdkit.Chem import Draw
+import pandas as pd
 
-title = st.text_input("SMILES Sequence", "CCCC")
-st.write("ADMET Results: ")
-results = admet_from_smiles(title)
-st.write("Physicochemical")
-st.table(results["Physicochemical"])
-st.write("Absorption")
-st.table(results["Absorption"])
-st.write("Distribution")
-st.table(results["Distribution"])
-st.write("Metabolism")
-st.table(results["Metabolism"])
-st.write("Excretion")
-st.table(results["Excretion"])
+st.set_page_config(layout="wide")
+admet_tab, de_novo = st.tabs(["ADMET", "De Novo"])
+
+with admet_tab:
+    col1, col2 = st.columns(2)
+
+    with col1:        
+        sequence = st.text_input("SMILES Sequence", "CCCC")
+        st.write("ADMET Results: ")
+        results = admet_from_smiles(sequence)
+        
+        # Create a unified DataFrame
+        combined_data = []
+        
+        # Combine Physicochemical data
+        for key, value in results["Physicochemical"].items():
+            combined_data.append({"Property": key, "Category": "Physicochemical", "Value": value})
+        
+        # Combine Absorption data
+        for key, value in results["Absorption"].items():
+            combined_data.append({"Property": key, "Category": "Absorption", "Value": value})
+        
+        # Combine Distribution data
+        for key, value in results["Distribution"].items():
+            combined_data.append({"Property": key, "Category": "Distribution", "Value": value})
+        
+        # Combine Metabolism data
+        for key, value in results["Metabolism"].items():
+            combined_data.append({"Property": key, "Category": "Metabolism", "Value": value})
+        
+        # Combine Excretion data
+        for key, value in results["Excretion"].items():
+            combined_data.append({"Property": key, "Category": "Excretion", "Value": value})
+        
+        # Combine Toxicity data
+        for key, value in results["Toxicity"].items():
+            combined_data.append({"Property": key, "Category": "Toxicity", "Value": value})
+        
+        # Create DataFrame from combined data
+        combined_df = pd.DataFrame(combined_data)
+        
+        # Display the table with a fixed width (use_container_width)
+        st.dataframe(combined_df, use_container_width=True)
+
+    with col2:
+        m = Chem.MolFromSmiles(sequence)
+        st.image(Draw.MolToImage(m))
+
+
+with de_novo:
+    st.write("De Novo")
+
+    
