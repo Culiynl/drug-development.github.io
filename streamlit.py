@@ -1,4 +1,6 @@
 from admet_ai import ADMETModel
+import math
+import matplotlib.pyplot as plt
 
 def admet_from_smiles(smiles):
     model = ADMETModel()
@@ -74,6 +76,54 @@ def admet_from_smiles(smiles):
 
     return organized_predictions
 
+def radar_chart(data, upper_limits):
+    pi = math.pi
+    categories = list(data.keys())
+    values = [data[key] for key in categories]
+    
+    # Number of variables
+    N = len(categories)
+    
+    # Compute angle of each axis
+    angles = [n / float(N) * 2 * pi for n in range(N)]
+    angles += angles[:1]  # To close the circle
+    
+    # Plotting
+    fig, ax = plt.subplots(figsize=(6, 6), subplot_kw=dict(polar=True))
+    ax.set_theta_offset(pi / 2)  # Rotate the chart so that the first category is at the top
+    ax.set_theta_direction(-1)  # Clockwise
+    
+    # Draw one axe per variable and add labels
+    ax.set_rlabel_position(0)
+    ax.set_xticks(angles[:-1])  # Remove the last angle
+    ax.set_xticklabels(categories, color='black', size=10)
+    
+    # Adjust yticks based on upper limits
+    max_value = max(upper_limits.values())  # Find the maximum upper limit for scaling
+    ax.set_yticks([i * max_value / 5 for i in range(1, 6)])  # Adjust as necessary
+    ax.set_yticklabels([str(int(i * max_value / 5)) for i in range(1, 6)], color='gray', size=8)
+    
+    # Scale the values according to their respective upper limits
+    scaled_values = [value / upper_limits[categories[i]] * max_value for i, value in enumerate(values)]
+    scaled_values += scaled_values[:1]  # Close the circle by repeating the first value
+    
+    # Plot the data
+    ax.plot(angles, scaled_values, color='b', linewidth=2, linestyle='solid')
+    ax.fill(angles, scaled_values, color='b', alpha=0.3)
+    
+    return fig
+
+upper_limits = {
+    "molecular_weight": 600,
+    "logP": 3,
+    "hydrogen_bond_acceptors": 12,
+    "hydrogen_bond_donors": 7,
+    "Lipinski": 5,
+    "QED": 1,
+    "stereo_centers": 10,
+    "tpsa": 140
+}
+
 import streamlit as st
 from rdkit import Chem
 from rdkit.Chem import Draw
@@ -125,7 +175,11 @@ with admet_tab:
 
     with col2:
         m = Chem.MolFromSmiles(sequence)
-        st.image(Draw.MolToImage(m))
+        st.image(Draw.MolToImage(m))        
+            
+        st.write("Radar Chart:")
+        fig = radar_chart(results["Physicochemical"], upper_limits)
+        st.pyplot(fig, use_container_width=False)
 
 
 with de_novo:
