@@ -4,7 +4,9 @@ import matplotlib.pyplot as plt
 import streamlit as st
 from rdkit import Chem
 from rdkit.Chem import Draw
-import pandas as pd
+from rdkit.Chem.Draw import rdMolDraw2D  
+import pandas as pd                                 
+
 
 model = ADMETModel()
 # Function to predict ADMET properties
