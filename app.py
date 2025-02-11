@@ -64,12 +64,12 @@ with admet_tab:
         st.dataframe(results, use_container_width=True)
 
     with col2:
-        m = Chem.MolFromSmiles(sequence)
-        st.image(Draw.MolToImage(m))
+        try:
+            m = Chem.MolFromSmiles(sequence)
+            st.image(Draw.MolToImage(m))
+        except Exception as e:
+            st.write("Could not render molecule image due to missing dependencies.")
 
-        st.write("Radar Chart:")
-        # fig = radar_chart(results, upper_limits)
-        # st.pyplot(fig)
 
 with de_novo:
     st.write("De Novo")    
