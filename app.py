@@ -5,7 +5,6 @@ import streamlit as st
 from rdkit import Chem
 from rdkit.Chem import Draw
 import pandas as pd
-from io import StringIO
 
 model = ADMETModel()
 # Function to predict ADMET properties
